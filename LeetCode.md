@@ -1,220 +1,193 @@
-## 一、leetcode
+## 1.BFS
 
+### [994. 腐烂的橘子](https://leetcode.cn/problems/rotting-oranges/)
 
+在给定的 m x n 网格 grid 中，每个单元格可以有以下三个值之一：
 
-### 1. 最大子序列和
+值 0 代表空单元格；
+值 1 代表新鲜橘子；
+值 2 代表腐烂的橘子。
+每分钟，腐烂的橘子 周围 4 个方向上相邻 的新鲜橘子都会腐烂。
 
-给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+返回 直到单元格中没有新鲜橘子为止所必须经过的最小分钟数。如果不可能，返回 -1 。
 
-示例:
+  **示例 1：** ![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/16/oranges.png) 
 
-输入: [-2,1,-3,4,-1,2,1,-5,4]
-输出: 6
-解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
-
-
-```python
-nums = [-2,1,-3,4,-1,2,1,-5,4]
-def maxSubArray(nums):
-    if len(nums) == 0:
-        return
-    maxnum = nums[0]  # 全局最大值
-    subMax = nums[0]  # 前一个子组合的最大值
-    for i in range(1, len(nums)):
-        if subMax > 0:
-            # 前一个子组合最大值大于0，正向增益
-            subMax = subMax + nums[i]
-        else:
-            # 前一个子组合最大值小于0，抛弃前面的结果
-            subMax = nums[i]
-        # 计算全局最大值
-        maxnum = max(maxnum, subMax)
-    return maxnum
-ret = maxSubArray(nums)
-print(ret)
+```
+输入：grid = [[2,1,1],[1,1,0],[0,1,1]]
+输出：4
 ```
 
-### 2. 加一
-给定一个由整数组成的非空数组所表示的非负整数，在该数的基础上加一。
+ **示例 2：** 
 
-最高位数字存放在数组的首位， 数组中每个元素只存储单个数字。
+```
+输入：grid = [[2,1,1],[0,1,1],[1,0,1]]
+输出：-1
+解释：左下角的橘子（第 2 行， 第 0 列）永远不会腐烂，因为腐烂只会发生在 4 个正向上。
+```
 
-你可以假设除了整数 0 之外，这个整数不会以零开头。
+ **示例 3：** 
 
-示例 1:
+```
+输入：grid = [[0,2]]
+输出：0
+解释：因为 0 分钟时已经没有新鲜橘子了，所以答案就是 0 。
+```
 
-输入: [1,2,3]
-输出: [1,2,4]
-解释: 输入数组表示数字 123。
+**提示：**
 
-【解题思路】
-
-转成数字
-然后+1
-最后转回列表
-
+- `m == grid.length`
+- `n == grid[i].length`
+- `1 <= m, n <= 10`
+- `grid[i][j]` 仅为 `0`、`1` 或 `2`
 
 ```python
 class Solution:
-    def plusOne(self, digits: List[int]) -> List[int]: 
-        l = digits  # 换成直观简单的名字
-        # 1.strat:列表转成字符串
-        s = ""
-        for i in l:
-            s += str(i)
-        # 1.end
-        s = int(s)  # 转换数字
-        s += 1  # 加一
-        s = list(str(s))  # 转换回列表
-        # 2.strat:列表元素类型转换回int
-        for i in range(len(s)):
-            s[i]=int(s[i])
-        # 2.end
-        return s  # 完结撒花
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        row = len(grid)
+        col = len(grid[0])
+        # 广度优先遍历BFS，需要用队列来存储需要被遍历的节点，对本题来说，即值为2的节点都需要被遍历。
+        queue = []
+        time = 0
+        dir = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        for i in range(row):
+            for j in range(col):
+                if grid[i][j] == 2:
+                    queue.append((i, j, time))
+        while queue:
+            i, j, time = queue.pop(0)
+            for di, dj in dir:
+                if 0 <= i + di < row and 0 <= j + dj < col and grid[i + di][j + dj] == 1:
+                    grid[i + di][j + dj] = 2
+                    queue.append((i + di, j + dj, time + 1))
+        for g in grid:
+            if 1 in g:
+                return -1
+        return time
+"""
+BFS和DFS区别：
+广度优先搜索算法（Breadth-First-Search，缩写为 BFS），是一种利用队列实现的搜索算法。简单来说，其搜索过程和 “湖面丢进一块石头激起层层涟漪” 类似。用于解决最短路径问题。
+深度优先搜索算法（Depth-First-Search，缩写为 DFS），是一种利用递归实现的搜索算法。简单来说，其搜索过程和 “不撞南墙不回头” 类似。
+https://cuijiahua.com/blog/2018/01/alogrithm_10.html
+https://leetcode-cn.com/problems/rotting-oranges/solution/li-qing-si-lu-wei-shi-yao-yong-bfsyi-ji-ru-he-xie-/
+"""
+"""
+与DFS几道题对比：
+该题初始状态可能同时存在多个腐烂的橘子，接下来会同时开始腐烂，不能像DFS那几道题一样，随便找到一个腐烂的句子就开始无脑”暴力搜索“。
+https://blog.csdn.net/qq_43857314/article/details/88077221
+"""
+"""
+心得：（1）BFS用队列存储需要被遍历的节点
+     （2）DFS实际上就是递归
+"""
 ```
-【列表转整数】
+
+## 2.差分
+
+### [370. 区间加法](https://leetcode.cn/problems/range-addition/)
+
+假设你有一个长度为 n 的数组，初始情况下所有的数字均为 0，你将会被给出 k 个更新的操作。
+
+其中，每个操作会被表示为一个三元组：[startIndex, endIndex, inc]，你需要将子数组 A[startIndex ... endIndex]（包括 startIndex 和 endIndex）增加 inc。
+
+请你返回 k 次操作后的数组。
+
+ **示例:** 
+
+```
+输入: length = 5, updates = [[1,3,2],[2,4,3],[0,2,-2]]
+输出: [-2,0,3,5,3]
+```
+
+ **解释:** 
+
+```
+初始状态:
+[0,0,0,0,0]
+
+进行了操作 [1,3,2] 后的状态:
+[0,2,2,2,0]
+
+进行了操作 [2,4,3] 后的状态:
+[0,2,5,5,3]
+
+进行了操作 [0,2,-2] 后的状态:
+[-2,0,3,5,3]
+```
 
 ```python
-a = [1,2,3,4,5]
-// join函数要求列表中的元素都是字符串，所以需要将列表中的元素都转换为字符串。
-a = [str(i) for i in a]
-b = int(''.join(a))
+class Solution:
+    def getModifiedArray(self, length: int, updates: List[List[int]]) -> List[int]:
+        diff = [0] * length
+        for t in range(len(updates)):
+            i, j, tmp = updates[t]
+            diff[i] += tmp
+            if j + 1 < length:
+                diff[j + 1] -= tmp
+        for i in range(1, len(diff)):
+            diff[i] = diff[i] + diff[i - 1]
+        return diff
 ```
 
-【列表（元组）转字符串】 
+#### [1094. 拼车](https://leetcode.cn/problems/car-pooling/)
 
-``` python
-a = [1,2,3,4,5]
-// join函数要求列表中的元素都是字符串，所以需要将列表中的元素都转换为字符串。
-a = [str(i) for i in a]
-b = ''.join(a)
-```
+车上最初有 capacity 个空座位。车 只能 向一个方向行驶（也就是说，不允许掉头或改变方向）
 
-【字符串转列表】
+给定整数 capacity 和一个数组 trips ,  trip[i] = [numPassengersi, fromi, toi] 表示第 i 次旅行有 numPassengersi 乘客，接他们和放他们的位置分别是 fromi 和 toi 。这些位置是从汽车的初始位置向东的公里数。
 
-``` python
-str1 = "hi hello world"
-print(str1.split(" "))
-输出：
-['hi', 'hello', 'world']
-```
+当且仅当你可以在所有给定的行程中接送所有乘客时，返回 true，否则请返回 false。
 
-
-
-### 3.  test
-
-
-
-## 二、剑指offer
-
-### 1、字符串全排列
-
-题目描述
-
-输入一个字符串,按字典序打印出该字符串中字符的所有排列。例如输入字符串abc,则按字典序打印出由字符a,b,c所能排列出来的所有字符串abc,acb,bac,bca,cab和cba。
-
-输入描述:
+ **示例 1：** 
 
 ```
-输入一个字符串,长度不超过9(可能有字符重复),字符只包括大小写字母。
+输入：trips = [[2,1,5],[3,3,7]], capacity = 4
+输出：false
 ```
 
-示例1
-
-输入
+ **示例 2：** 
 
 ```
-"ab"
+输入：trips = [[2,1,5],[3,3,7]], capacity = 5
+输出：true
 ```
 
-返回值
-
-```
-["ab","ba"]
-```
-
-**python 迭代器**
-itertools.permutations()
-itertools.permutations(iterable, r=None)
-连续返回由 *iterable* 元素生成长度为 *r* 的排列。
-如果 *r* 未指定或为 `None` ，*r* 默认设置为 *iterable* 的长度，这种情况下，生成所有全长排列。
-排列依字典序发出。因此，如果 *iterable* 是已排序的，排列元组将有序地产出。
-即使元素的值相同，不同位置的元素也被认为是不同的。如果元素值都不同，每个排列中的元素值不会重复。
-
-``` python
-import itertools
-s = itertools.permutations(iterable, r=None)
-print(s)
->>>
-<itertools.permutations object at 0x00000000012E67C0>
+```python
+class Solution:
+    def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
+        diff = [0] * 1001
+        for t in range(len(trips)):
+            tmp, i, j = trips[t]
+            diff[i] += tmp
+            # 先下后上，因此本题是 diff[j] -= tmp，而不是 diff[j+1] -= tmp
+            if j < 1001:
+                diff[j] -= tmp
+        if diff[0] > capacity:
+            return False
+        # 遍历不包括查分数组的第一项，因此index = 0要单独考虑
+        for i in range(1, 1001):
+            diff[i] = diff[i] + diff[i - 1]
+            if diff[i] > capacity:
+                return False
+        return True
 ```
 
-【重要】permutations返回的是 **对象地址**，原因是在python3里面，返回值已经不再是list，而是iterators（迭代器）, 所以想要使用，只好将iterator 转换成list。
+#### [1109. 航班预订统计](https://leetcode.cn/problems/corporate-flight-bookings/)
 
-``` python
-import itertools
+## 3.DFS
 
-def Permutation(ss):
-    if not ss:
-        return ss
-    result = []
-    s = list(itertools.permutations(ss))
-    # 列表中的每个元素（元组）转化为字符串  
-    # [('a', 'b', 'c'), ('a', 'c', 'b'), ('b', 'a', 'c'), ('b', 'c', 'a'), ('c', 'a', 'b'), ('c', 'b', 'a')]
-    for i in s:
-        result.append(''.join(i))
-    # 使用set方法给list去重
-    result = list(set(result))
-    # 排序
-    result.sort()
-    return result
+#### [200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/)
 
-str1 = Permutation('abc')
-print(str1)
->>>
-['abc', 'acb', 'bac', 'bca', 'cab', 'cba']
-```
+#### [695. 岛屿的最大面积](https://leetcode.cn/problems/max-area-of-island/)
 
-题目描述
+#### [1219. 黄金矿工](https://leetcode.cn/problems/path-with-maximum-gold/)
 
-汇编语言中有一种移位指令叫做循环左移（ROL），现在有个简单的任务，就是用字符串模拟这个指令的运算结果。对于一个给定的字符序列S，请你把其循环左移K位后的序列输出。例如，字符序列S=”abcXYZdef”,要求输出循环左移3位后的结果，即“XYZdefabc”。是不是很简单？OK，搞定它！
+## 4.动态规划
 
-示例1
+#### [198. 打家劫舍](https://leetcode.cn/problems/house-robber/)
 
-输入
+#### [416. 分割等和子集](https://leetcode.cn/problems/partition-equal-subset-sum/)
 
-```
-"abcXYZdef",3
-```
+#### [1049. 最后一块石头的重量 II](https://leetcode.cn/problems/last-stone-weight-ii/)
 
-返回值
 
-```
-"XYZdefabc"
-```
 
-``` python
-def leftMove(str1,num):
-    strlen = len(str1)
-    leftMoveNum = num % strlen
-    str1 = str1[leftMoveNum:] + str1[:leftMoveNum]
-    return str1
-
-ret = leftMove("abcXYZdef", 3)
-print(ret)
->>>
-XYZdefabc
-```
-
-**字符串运算符**
-
-下表实例变量 a 值为字符串 "Hello"，b 变量值为 "Python"：
-
-| 操作符 | 描述                                               | 实例                   |
-| :----- | :------------------------------------------------- | :--------------------- |
-| +      | 字符串连接                                         | >>>a + b 'HelloPython' |
-| *      | 重复输出字符串                                     | >>>a * 2 'HelloHello'  |
-| []     | 通过索引获取字符串中字符                           | >>>a[1] 'e'            |
-| [ : ]  | 截取字符串中的一部分                               | >>>a[1:4] 'ell'        |
-| in     | 成员运算符 - 如果字符串中包含给定的字符返回 True   | >>>"H" in a True       |
-| not in | 成员运算符 - 如果字符串中不包含给定的字符返回 True | >>>"M" not in a True   |
