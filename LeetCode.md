@@ -392,6 +392,18 @@ class Solution:
 
 #### [3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/)
 
+#### [209. 长度最小的子数组](https://leetcode.cn/problems/minimum-size-subarray-sum/)
+
+#### [438. 找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/)
+
+#### [643. 子数组最大平均数 I](https://leetcode.cn/problems/maximum-average-subarray-i/)
+
+#### [1004. 最大连续1的个数 III](https://leetcode.cn/problems/max-consecutive-ones-iii/)
+
+#### [1052. 爱生气的书店老板](https://leetcode.cn/problems/grumpy-bookstore-owner/)
+
+#### [1695. 删除子数组的最大得分](https://leetcode.cn/problems/maximum-erasure-value/)
+
 
 
 
